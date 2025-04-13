@@ -1,55 +1,63 @@
-#include <iostream>
-#include <queue>
-#include <unordered_map>
-#include <list>
-#include <vector>
 
-using namespace std;
+#include <stdio.h>
+#include <stdbool.h>
 
-// Base class for page replacement
-class PageReplacement {
-public:
-    virtual void insertPage(int page) = 0;
-    virtual void displayMemory() = 0;
-    virtual int getPageFaults() = 0;
-};
+#define MAX_FRAMES 3 
 
-// FIFO Page Replacement
-class FIFOPageReplacement : public PageReplacement {
-private:
-    queue<int> memoryQueue;
-    unordered_map<int, bool> memoryMap;
-    int capacity;
-    int pageFaults;
+int main() {
+    int pages[100], frames[MAX_FRAMES];
+    int n, i, j;
+    int pageFaults = 0;
+    int index = 0;  
 
-public:
-    FIFOPageReplacement(int cap) : capacity(cap), pageFaults(0) {}
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
 
-    void insertPage(int page) override {
-        if (!memoryMap[page]) {
-            pageFaults++;
-            if (memoryQueue.size() == capacity) {
-                int removed = memoryQueue.front();
-                memoryQueue.pop();
-                memoryMap[removed] = false;
+    
+    printf("Enter page references:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    
+    for (i = 0; i < MAX_FRAMES; i++) {
+        frames[i] = -1;
+    }
+    printf("\nPage Replacement Process:\n");
+    for (i = 0; i < n; i++) {
+        bool found = false;
+
+        
+        for (j = 0; j < MAX_FRAMES; j++) {
+            if (frames[j] == pages[i]) {
+                found = true;
+                break;
             }
-            memoryQueue.push(page);
-            memoryMap[page] = true;
+        }
+
+    
+        if (!found) {
+            frames[index] = pages[i];  
+            index = (index + 1) % MAX_FRAMES;  
+            pageFaults++;
+
+            
+            printf("Page %d -> ", pages[i]);
+            for (j = 0; j < MAX_FRAMES; j++) {
+                if (frames[j] == -1)
+                    printf("[ ] ");
+                else
+                    printf("[%d] ", frames[j]);
+            }
+            printf("  (Page Fault)\n");
+        } else {
+            
+            printf("Page %d -> Hit\n", pages[i]);
         }
     }
 
-    void displayMemory() override {
-        queue<int> temp = memoryQueue;
-        cout << "Memory: ";
-        while (!temp.empty()) {
-            cout << temp.front() << " ";
-            temp.pop();
-        }
-        cout << endl;
-    }
+    printf("\nTotal Page Faults: %d\n", pageFaults);
 
-    int getPageFaults() override {
-        return pageFaults;
-    }
-};
+    return 0;
+}
 
